@@ -9,7 +9,8 @@ jobs:
   test-windows:
     runs-on: windows-latest
     env:
-      PYTHONIOENCODING: utf-8   # ensure console handles Unicode output
+      PYTHONIOENCODING: utf-8          # allow Unicode output
+      PYTHONPATH: ${{ github.workspace }}  # make securecrypto.py importable from examples/
     steps:
       - name: Checkout
         uses: actions/checkout@v4
