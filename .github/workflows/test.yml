@@ -24,9 +24,16 @@ jobs:
           pip install pythonnet
 
       - name: Verify DLL present
+        shell: pwsh
         run: |
-          if not exist SecureCrypto.dll ( echo "SecureCrypto.dll missing" && exit /b 1 )
-          if not exist securecrypto.py ( echo "securecrypto.py missing" && exit /b 1 )
+          if (-Not (Test-Path "SecureCrypto.dll")) {
+            Write-Error "SecureCrypto.dll missing"
+            exit 1
+          }
+          if (-Not (Test-Path "securecrypto.py")) {
+            Write-Error "securecrypto.py missing"
+            exit 1
+          }
 
       - name: Run self-test
         run: python securecrypto.py

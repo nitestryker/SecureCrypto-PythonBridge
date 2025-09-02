@@ -3,7 +3,7 @@ name: Nightly - Assign Milestones
 
 on:
   schedule:
-    # Runs daily at 09:00 UTC (≈ 2am PT / 1am PST)
+    # Runs daily at 09:00 UTC
     - cron: '0 9 * * *'
   workflow_dispatch:
 
@@ -31,6 +31,14 @@ jobs:
         run: |
           gh --version
           gh auth status || echo "Using GITHUB_TOKEN via GH_TOKEN env"
+
+      - name: Verify scripts exist
+        shell: pwsh
+        run: |
+          if (-Not (Test-Path "assign_milestones.py")) {
+            Write-Error "assign_milestones.py missing"
+            exit 1
+          }
 
       - name: Run milestone assignment
         run: python assign_milestones.py

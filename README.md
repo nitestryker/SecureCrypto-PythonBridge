@@ -6,6 +6,9 @@
 ![Build](https://img.shields.io/badge/build-passing-brightgreen)
 
 
+[![CI - Python self-test](https://github.com/nitestryker/SecureCrypto-PythonBridge/actions/workflows/test.yml/badge.svg)](https://github.com/nitestryker/SecureCrypto-PythonBridge/actions/workflows/test.yml)
+[![Nightly - Assign Milestones](https://github.com/nitestryker/SecureCrypto-PythonBridge/actions/workflows/assign-milestones.yml/badge.svg)](https://github.com/nitestryker/SecureCrypto-PythonBridge/actions/workflows/assign-milestones.yml)
+
 🔐 A ready-to-use .NET cryptography library (**SecureCrypto.dll**) with a Python wrapper (**securecrypto.py**) for easy encryption, decryption, hashing, signing, and key management in your own applications.
 
 ---
