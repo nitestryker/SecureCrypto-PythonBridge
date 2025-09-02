@@ -1,0 +1,53 @@
+name: Development Roadmap
+description: Kanban-style roadmap board for SecureCrypto-PythonBridge
+public: true
+
+# Views = how you visualize the project
+views:
+  - name: Board
+    type: board
+    filters: ""
+    fields:
+      - name: Status
+        type: single_select
+        options:
+          - name: Backlog
+            color: "#dddddd"
+          - name: In Progress
+            color: "#84b6eb"
+          - name: Done
+            color: "#0e8a16"
+
+  - name: By Label
+    type: table
+    filters: ""
+    group_by: Labels
+
+  - name: By Milestone
+    type: table
+    filters: ""
+    group_by: Milestone
+
+  - name: Open Issues
+    type: table
+    filters: "is:issue is:open"
+
+  - name: Closed Issues
+    type: table
+    filters: "is:issue is:closed"
+
+# Automation rules
+workflows:
+  - name: New issues → Backlog
+    on:
+      - issues.opened
+    set:
+      field: Status
+      value: Backlog
+
+  - name: Closed issues → Done
+    on:
+      - issues.closed
+    set:
+      field: Status
+      value: Done

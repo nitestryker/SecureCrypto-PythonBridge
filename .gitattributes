@@ -1,0 +1,23 @@
+
+# Auto detect text files and normalize line endings
+* text=auto
+
+# Explicitly mark source files as text
+*.py text diff=python
+*.cs text diff=csharp
+*.md text
+*.yml text
+*.yaml text
+*.json text
+*.xml text
+*.txt text
+
+# Binary files
+*.dll binary
+*.exe binary
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.sig binary

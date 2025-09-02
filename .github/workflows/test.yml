@@ -1,0 +1,38 @@
+
+name: CI - Python self-test
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pythonnet
+
+      - name: Verify DLL present
+        run: |
+          if not exist SecureCrypto.dll ( echo "SecureCrypto.dll missing" && exit /b 1 )
+          if not exist securecrypto.py ( echo "securecrypto.py missing" && exit /b 1 )
+
+      - name: Run self-test
+        run: python securecrypto.py
+
+      - name: Run examples
+        run: |
+          python examples/aes_example.py
+          python examples/rsa_hybrid_example.py
+          python examples/sign_verify_example.py

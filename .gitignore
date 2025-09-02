@@ -1,0 +1,53 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pkl
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+.venv/
+venv/
+ENV/
+env/
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Virtualenv
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Coverage / Testing
+.coverage
+.tox/
+.nox/
+.pytest_cache/
+htmlcov/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# .NET / C#
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll.config
+*.exe.config
+
+# Misc
+Thumbs.db
+.DS_Store
+*.bak
+*.tmp
