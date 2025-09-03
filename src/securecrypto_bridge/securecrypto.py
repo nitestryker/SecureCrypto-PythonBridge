@@ -320,4 +320,4 @@ if __name__ == '__main__':
     assert hmac_verify("msg", hm, "key", HMAC_ALGORITHMS_MAP["sha256"]) is True
     print("Hash/HMAC OK")
 
-    print("[securecrypto] Self-test PASSED ✅")
+    print("[securecrypto] Self-test PASSED [OK]")
