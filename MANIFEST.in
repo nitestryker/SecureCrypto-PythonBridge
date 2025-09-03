@@ -1,0 +1,11 @@
+# Include top-level docs
+include LICENSE
+include README.md
+
+# Include the DLL packaged with the module (src layout)
+recursive-include src/securecrypto_bridge *.dll
+
+# (optional) include examples and extra docs if you want them in the sdist
+# recursive-include examples *.py
+# include IMPLEMENTATION_IDEAS.md
+# include securecrypto_cheatsheet.pdf

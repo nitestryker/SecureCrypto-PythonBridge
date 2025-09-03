@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=77", "wheel", "build"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "securecrypto-bridge"
+version = "1.0.0"
+description = "Python bridge for SecureCrypto.dll: encryption, hashing, signing, key management"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"  # SPDX identifier
+authors = [
+  { name = "Jeremy", email = "jeremiahstevens@gmial.com" }
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: Microsoft :: Windows",
+  "Topic :: Security :: Cryptography"
+]
+
+[project.urls]
+Homepage = "https://github.com/nitestryker/SecureCrypto-PythonBridge"
+Issues   = "https://github.com/nitestryker/SecureCrypto-PythonBridge/issues"
+Source   = "https://github.com/nitestryker/SecureCrypto-PythonBridge"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+license-files = ["LICENSE"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["securecrypto_bridge*"]
+
+[tool.setuptools.package-data]
+securecrypto_bridge = ["SecureCrypto.dll"]
