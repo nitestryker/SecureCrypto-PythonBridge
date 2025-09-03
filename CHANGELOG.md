@@ -8,16 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [Unreleased]
+## [1.0.0] - 2025-09-02
 
 ### Added
 - Initial release scaffolding.
 
----
-
-## [1.0.0] - 2025-09-01
-
-### Added
 - `SecureCrypto.dll` (C# cryptography library).
 - `securecrypto.py` Python wrapper with helpers for:
   - AES encryption/decryption (strings, bytes, files).
