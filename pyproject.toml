@@ -4,6 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "securecrypto-bridge"
+# bumped to 1.0.1 for README updates
 version = "1.0.1"
 description = "Python bridge for SecureCrypto.dll: encryption, hashing, signing, key management"
 readme = "README.md"
