@@ -33,4 +33,4 @@ where = ["src"]
 include = ["securecrypto_bridge*"]
 
 [tool.setuptools.package-data]
-securecrypto_bridge = ["SecureCrypto.dll"]
+securecrypto_bridge = ["SecureCrypto.dll", "py.typed"]

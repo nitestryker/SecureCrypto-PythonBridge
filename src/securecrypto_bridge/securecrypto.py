@@ -1,6 +1,6 @@
 # securecrypto.py
 # Thin Python wrapper around SecureCrypto.dll (C#) for simple, pythonic calls.
-# Assumes SecureCrypto.dll is next to this file or provide a path to init().
+# Assumes SecureCrypto.dll is bundled inside the installed package or next to this file.
 #
 # Exposes:
 # - init(dll_path=None)
@@ -22,14 +22,34 @@
 # Works with pythonnet >= 3.x.
 
 import os
+import sys
 from pathlib import Path
+import importlib.resources as ir  # NEW: for loading DLL when installed as a package
 
 _loaded = False
 CryptoHelper = None
 OutputEncoding = None
 
+def _find_packaged_dll() -> Path | None:
+    """
+    Try to locate SecureCrypto.dll inside the installed package using importlib.resources.
+    Returns a Path if found, else None.
+    """
+    try:
+        # __package__ resolves to this module's package when installed/imported
+        pkg = __package__ or __name__.rpartition(".")[0]
+        # If this module is at top-level (no package), __package__ may be empty.
+        if not pkg:
+            return None
+        candidate = ir.files(pkg).joinpath("SecureCrypto.dll")
+        if candidate.is_file():
+            return Path(candidate)
+    except Exception:
+        pass
+    return None
+
 def init(dll_path: str | os.PathLike | None = None) -> None:
-    """Load SecureCrypto.dll via pythonnet. If dll_path is None, search next to this file."""
+    """Load SecureCrypto.dll via pythonnet. If dll_path is None, search the installed package first, then next to this file, then by name."""
     global _loaded, CryptoHelper, OutputEncoding
     if _loaded:
         return
@@ -39,24 +59,38 @@ def init(dll_path: str | os.PathLike | None = None) -> None:
     except ImportError as e:
         raise RuntimeError("pythonnet is required. Install with: pip install pythonnet") from e
 
-    # Resolve path
-    if dll_path is None:
-        here = Path(__file__).resolve().parent
-        candidate = here / "SecureCrypto.dll"
-    else:
-        candidate = Path(dll_path).resolve()
+    # Resolve DLL location in this order:
+    # 1) Explicit dll_path (caller provided)
+    # 2) Packaged resource (importlib.resources) when installed
+    # 3) Next to this file (editable/development installs)
+    # 4) Let CLR probe by assembly name "SecureCrypto"
+    candidate: Path | None = None
 
-    if not candidate.exists():
-        # Fallback: try to let CLR probe by name if DLL is in CWD
+    if dll_path is not None:
+        candidate = Path(dll_path).resolve()
+    else:
+        candidate = _find_packaged_dll()
+        if candidate is None:
+            here = Path(__file__).resolve().parent
+            local = here / "SecureCrypto.dll"
+            if local.exists():
+                candidate = local
+
+    if candidate is not None and candidate.exists():
+        # Ensure the directory is on sys.path so dependent probing works if needed
+        sys.path.append(str(candidate.parent))
+        # pythonnet 3.x: AddReference can take an absolute path
+        clr.AddReference(str(candidate))
+    else:
+        # Fallback to assembly name if DLL is discoverable by CLR (e.g., in CWD)
         try:
             clr.AddReference("SecureCrypto")
         except Exception as e:
+            where = candidate if candidate is not None else Path("<not found>")
             raise FileNotFoundError(
-                f"Could not find SecureCrypto.dll at {candidate} and AddReference by name failed."
+                f"Could not locate SecureCrypto.dll (looked at {where}). "
+                f"Ensure the DLL is packaged with this module or provide dll_path to init()."
             ) from e
-    else:
-        # pythonnet 3.x accepts full path
-        clr.AddReference(str(candidate))
 
     # Import after reference
     from SecureCrypto import CryptoHelper as _CH, OutputEncoding as _OE  # type: ignore
@@ -282,4 +316,4 @@ if __name__ == '__main__':
     assert hmac_verify("msg", hm, "key", HMAC_ALGORITHMS_MAP["sha256"]) is True
     print("Hash/HMAC OK")
 
-    print("[securecrypto] Self-test PASSED [OK]")
+    print("[securecrypto] Self-test PASSED ✅")

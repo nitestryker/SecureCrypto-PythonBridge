@@ -1,3 +1,4 @@
+
 name: CI - Python self-test
 
 on:
@@ -9,8 +10,7 @@ jobs:
   test-windows:
     runs-on: windows-latest
     env:
-      PYTHONIOENCODING: utf-8          # allow Unicode output
-      PYTHONPATH: ${{ github.workspace }}  # make securecrypto.py importable from examples/
+      PYTHONIOENCODING: utf-8
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,21 +24,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pythonnet
+          pip install -e .
 
-      - name: Verify DLL present
+      - name: Verify package layout
         shell: pwsh
         run: |
-          if (-Not (Test-Path "SecureCrypto.dll")) {
-            Write-Error "SecureCrypto.dll missing"
-            exit 1
-          }
-          if (-Not (Test-Path "securecrypto.py")) {
-            Write-Error "securecrypto.py missing"
-            exit 1
-          }
+          if (-Not (Test-Path "src/securecrypto_bridge/securecrypto.py")) { Write-Error "securecrypto.py not in src layout"; exit 1 }
+          if (-Not (Test-Path "src/securecrypto_bridge/SecureCrypto.dll")) { Write-Error "SecureCrypto.dll missing under src/securecrypto_bridge"; exit 1 }
 
       - name: Run self-test
-        run: python securecrypto.py
+        run: python -c "import securecrypto_bridge as sc; import importlib; importlib.reload(sc); exec(open('src/securecrypto_bridge/securecrypto.py','r',encoding='utf-8').read())"
 
       - name: Run examples
         run: |
