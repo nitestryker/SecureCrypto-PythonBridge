@@ -1,4 +1,4 @@
-name: Test Package
+name: Test
 
 on:
   push:
@@ -8,30 +8,23 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
-      - name: Install build tools
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install build
-
-      - name: Build package
-        run: python -m build
-
-      - name: Install package
-        run: |
-          pip install dist/*.whl
+          pip install pythonnet
 
       - name: Run self-test
         run: |
           echo "__file__ = 'src/securecrypto_bridge/securecrypto.py'" > temp_selftest.py
-          cat src/securecrypto_bridge/securecrypto.py >> temp_selftest.py
+          type src/securecrypto_bridge/securecrypto.py >> temp_selftest.py
           python temp_selftest.py
