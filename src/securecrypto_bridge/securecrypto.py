@@ -71,7 +71,11 @@ def init(dll_path: str | os.PathLike | None = None) -> None:
     else:
         candidate = _find_packaged_dll()
         if candidate is None:
-            here = Path(__file__).resolve().parent
+            # Robust handling when __file__ is not defined (e.g., exec/open in CI)
+            try:
+                here = Path(__file__).resolve().parent  # type: ignore[name-defined]
+            except NameError:
+                here = Path.cwd()
             local = here / "SecureCrypto.dll"
             if local.exists():
                 candidate = local
