@@ -7,7 +7,8 @@
 
 
 [![CI - Python self-test](https://github.com/nitestryker/SecureCrypto-PythonBridge/actions/workflows/test.yml/badge.svg)](https://github.com/nitestryker/SecureCrypto-PythonBridge/actions/workflows/test.yml)
-[![Nightly - Assign Milestones](https://github.com/nitestryker/SecureCrypto-PythonBridge/actions/workflows/assign-milestones.yml/badge.svg)](https://github.com/nitestryker/SecureCrypto-PythonBridge/actions/workflows/assign-milestones.yml)
+
+[![PyPI](https://img.shields.io/pypi/v/securecrypto-bridge)](https://pypi.org/project/securecrypto-bridge/)
 
 🔐 A ready-to-use .NET cryptography library (**SecureCrypto.dll**) with a Python wrapper (**securecrypto.py**) for easy encryption, decryption, hashing, signing, and key management in your own applications.
 
@@ -36,7 +37,17 @@ pip install pythonnet
 
 2. Clone this repository and place `SecureCrypto.dll` and `securecrypto.py` next to your project files.
 
+
+## Installation
+
+### From PyPI (once published)
+pip install securecrypto-bridge
+
+### From TestPyPI (sandbox)
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple securecrypto-bridge
+
 ---
+
 
 ## 🚀 Quick Usage
 

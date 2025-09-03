@@ -1,0 +1,8 @@
+Title,Body,Labels
+Publish to PyPI,"Package SecureCrypto-PythonBridge and publish to PyPI as `securecrypto-bridge` so it can be installed via `pip install securecrypto-bridge`.",enhancement
+Add CLI entry point,"Add a CLI interface: `python -m securecrypto ...` for quick encrypt/decrypt, sign/verify operations.",feature
+Structured exceptions,"Introduce clearer error classes such as `DecryptError`, `KeyLoadError`, and `HashMismatchError` to improve debugging.",enhancement
+Add richer type hints and docstrings,"Expand Python wrapper with type hints and full docstrings for IDE support and developer clarity.",documentation
+Add encrypt_and_sign / verify_and_decrypt helpers,"Implement convenience functions to combine common workflows.",feature
+Add more examples,"Expand `examples/` with demos: API HMAC signing, encrypted notes application, and file integrity checker.",documentation
+Add benchmarks,"Add AES and Hybrid RSA+AES performance benchmarks (timings, throughput) on typical file sizes.",testing
