@@ -1,15 +1,10 @@
 # SecureCrypto-PythonBridge
-
-![Python](https://img.shields.io/badge/python-3.9%2B-blue)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Build](https://img.shields.io/badge/build-passing-brightgreen)
-
-
-[![CI - Python self-test](https://github.com/nitestryker/SecureCrypto-PythonBridge/actions/workflows/test.yml/badge.svg)](https://github.com/nitestryker/SecureCrypto-PythonBridge/actions/workflows/test.yml)
-
+## Badges (add under title)
 [![PyPI](https://img.shields.io/pypi/v/securecrypto-bridge)](https://pypi.org/project/securecrypto-bridge/)
-
+![Python Versions](https://img.shields.io/pypi/pyversions/securecrypto-bridge)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![CI - Python self-test](https://github.com/nitestryker/SecureCrypto-PythonBridge/actions/workflows/test.yml/badge.svg)](https://github.com/nitestryker/SecureCrypto-PythonBridge/actions/workflows/test.yml)
+[![Nightly - Assign Milestones](https://github.com/nitestryker/SecureCrypto-PythonBridge/actions/workflows/assign-milestones.yml/badge.svg)](https://github.com/nitestryker/SecureCrypto-PythonBridge/actions/workflows/assign-milestones.yml)
 
 
 🔐 A ready-to-use .NET cryptography library (**SecureCrypto.dll**) with a Python wrapper (**securecrypto.py**) for easy encryption, decryption, hashing, signing, and key management in your own applications.
@@ -29,26 +24,26 @@
 
 ---
 
-## 📦 Installation
-
-1. Install [pythonnet](https://github.com/pythonnet/pythonnet):
-
-```bash
-pip install pythonnet
-```
-
-2. Clone this repository and place `SecureCrypto.dll` and `securecrypto.py` next to your project files.
-
+> ⚠️ Platform: Windows only (uses a .NET DLL via pythonnet). Linux/macOS planned in the roadmap.
 
 ## Installation
-
-### From PyPI 
-
 ```bash
 pip install securecrypto-bridge
 ```
 
----
+From source (dev):
+```bash
+pip install -e .
+```
+
+## Quick Start
+```python
+import securecrypto_bridge as sc
+
+c = sc.encrypt("Hello", "pw")
+print(sc.decrypt(c, "pw"))
+print(sc.hash_string("abc"))
+```
 
 
 ## 🚀 Quick Usage
@@ -84,6 +79,29 @@ print("Signature valid?", sc.verify_string("hello", sig, pub))
 - [Implementation Ideas](IMPLEMENTATION_IDEAS.md) — how to use this library in real projects  
 
 ---
+## SecureCrypto C# Source
+
+This folder contains the full C# source code for building the `SecureCrypto.dll` used in the Python bridge.
+
+## 🔧 Requirements
+
+- .NET Framework 4.8 (Windows)
+- Visual Studio 2022 (or compatible)
+- Python consumers must install `pythonnet`
+
+## 📦 Project Contents
+
+- `SecureCrypto.sln` – Solution file
+- `SecureCrypto/` – C# class library
+  - `SecureCrypto.csproj` – Project file
+  - `CryptoLib.cs` – Core cryptographic logic
+
+## 🛠 How to Build
+
+1. Open the `SecureCrypto.sln` in Visual Studio.
+2. Build the solution in **Release** mode.
+3. The DLL will be located at:
+
 
 
 ---

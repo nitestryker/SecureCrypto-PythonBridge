@@ -21,3 +21,8 @@
 *.jpeg binary
 *.gif binary
 *.sig binary
+
+# Ensure consistent line endings
+*.cs text eol=lf
+*.sln text eol=crlf
+*.csproj text eol=crlf
