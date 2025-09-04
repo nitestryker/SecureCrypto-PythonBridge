@@ -272,52 +272,324 @@ def load_signature(sig_path: str | os.PathLike) -> str:
         return f.read().strip()
 
 
+# --------- CLI Interface ---------
+def _setup_cli_parser():
+    """Set up the argument parser for the CLI."""
+    import argparse
+    
+    parser = argparse.ArgumentParser(
+        prog='securecrypto',
+        description='SecureCrypto CLI - Encryption, signing, and hashing utilities',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Encrypt/decrypt text
+  python -m securecrypto encrypt "Hello World" --password mypass
+  python -m securecrypto decrypt <base64_cipher> --password mypass
+  
+  # File operations
+  python -m securecrypto encrypt-file input.txt output.enc --password mypass
+  python -m securecrypto decrypt-file output.enc decrypted.txt --password mypass
+  
+  # Generate keypair
+  python -m securecrypto keygen --public pub.xml --private priv.xml
+  
+  # Hybrid encryption (RSA + AES)
+  python -m securecrypto hybrid-encrypt "Secret message" --public-key pub.xml
+  python -m securecrypto hybrid-decrypt <base64_cipher> --private-key priv.xml
+  
+  # Signing and verification
+  python -m securecrypto sign "Document text" --private-key priv.xml
+  python -m securecrypto verify "Document text" <signature> --public-key pub.xml
+  python -m securecrypto sign-file document.pdf --private-key priv.xml
+  python -m securecrypto verify-file document.pdf document.pdf.sig --public-key pub.xml
+  
+  # Hashing
+  python -m securecrypto hash "text to hash" --algorithm SHA256
+  python -m securecrypto hash-file document.pdf --algorithm SHA512
+  python -m securecrypto hmac "message" --key "secret" --algorithm HMACSHA256
+        """
+    )
+    
+    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    
+    # Encrypt command
+    encrypt_parser = subparsers.add_parser('encrypt', help='Encrypt text')
+    encrypt_parser.add_argument('text', help='Text to encrypt')
+    encrypt_parser.add_argument('--password', '-p', help='Password for encryption')
+    encrypt_parser.add_argument('--encoding', '-e', choices=['base64', 'hex'], default='base64',
+                               help='Output encoding (default: base64)')
+    
+    # Decrypt command
+    decrypt_parser = subparsers.add_parser('decrypt', help='Decrypt text')
+    decrypt_parser.add_argument('ciphertext', help='Encrypted text (base64)')
+    decrypt_parser.add_argument('--password', '-p', help='Password for decryption')
+    
+    # Encrypt file command
+    encrypt_file_parser = subparsers.add_parser('encrypt-file', help='Encrypt a file')
+    encrypt_file_parser.add_argument('input', help='Input file path')
+    encrypt_file_parser.add_argument('output', help='Output file path')
+    encrypt_file_parser.add_argument('--password', '-p', help='Password for encryption')
+    
+    # Decrypt file command
+    decrypt_file_parser = subparsers.add_parser('decrypt-file', help='Decrypt a file')
+    decrypt_file_parser.add_argument('input', help='Input file path')
+    decrypt_file_parser.add_argument('output', help='Output file path')
+    decrypt_file_parser.add_argument('--password', '-p', help='Password for decryption')
+    
+    # Generate keypair command
+    keygen_parser = subparsers.add_parser('keygen', help='Generate RSA keypair')
+    keygen_parser.add_argument('--public', '-pub', help='Public key output file (default: stdout)')
+    keygen_parser.add_argument('--private', '-priv', help='Private key output file (default: stdout)')
+    
+    # Hybrid encrypt command
+    hybrid_enc_parser = subparsers.add_parser('hybrid-encrypt', help='Hybrid encrypt (RSA + AES)')
+    hybrid_enc_parser.add_argument('text', help='Text to encrypt')
+    hybrid_enc_parser.add_argument('--public-key', '-pub', required=True, help='Public key file or XML string')
+    
+    # Hybrid decrypt command
+    hybrid_dec_parser = subparsers.add_parser('hybrid-decrypt', help='Hybrid decrypt (RSA + AES)')
+    hybrid_dec_parser.add_argument('ciphertext', help='Encrypted text (base64)')
+    hybrid_dec_parser.add_argument('--private-key', '-priv', required=True, help='Private key file or XML string')
+    
+    # Sign command
+    sign_parser = subparsers.add_parser('sign', help='Sign text')
+    sign_parser.add_argument('text', help='Text to sign')
+    sign_parser.add_argument('--private-key', '-priv', required=True, help='Private key file or XML string')
+    
+    # Verify command
+    verify_parser = subparsers.add_parser('verify', help='Verify text signature')
+    verify_parser.add_argument('text', help='Original text')
+    verify_parser.add_argument('signature', help='Signature (base64)')
+    verify_parser.add_argument('--public-key', '-pub', required=True, help='Public key file or XML string')
+    
+    # Sign file command
+    sign_file_parser = subparsers.add_parser('sign-file', help='Sign a file')
+    sign_file_parser.add_argument('file', help='File to sign')
+    sign_file_parser.add_argument('--private-key', '-priv', required=True, help='Private key file or XML string')
+    sign_file_parser.add_argument('--output', '-o', help='Signature output file (default: <file>.sig)')
+    
+    # Verify file command
+    verify_file_parser = subparsers.add_parser('verify-file', help='Verify file signature')
+    verify_file_parser.add_argument('file', help='File to verify')
+    verify_file_parser.add_argument('signature', help='Signature file')
+    verify_file_parser.add_argument('--public-key', '-pub', required=True, help='Public key file or XML string')
+    
+    # Hash command
+    hash_parser = subparsers.add_parser('hash', help='Hash text')
+    hash_parser.add_argument('text', help='Text to hash')
+    hash_parser.add_argument('--algorithm', '-a', choices=['SHA256', 'SHA512'], default='SHA256',
+                           help='Hash algorithm (default: SHA256)')
+    
+    # Hash file command
+    hash_file_parser = subparsers.add_parser('hash-file', help='Hash a file')
+    hash_file_parser.add_argument('file', help='File to hash')
+    hash_file_parser.add_argument('--algorithm', '-a', choices=['SHA256', 'SHA512'], default='SHA256',
+                                help='Hash algorithm (default: SHA256)')
+    
+    # HMAC command
+    hmac_parser = subparsers.add_parser('hmac', help='Generate HMAC')
+    hmac_parser.add_argument('message', help='Message to authenticate')
+    hmac_parser.add_argument('--key', '-k', required=True, help='HMAC key')
+    hmac_parser.add_argument('--algorithm', '-a', choices=['HMACSHA256', 'HMACSHA512'], 
+                           default='HMACSHA256', help='HMAC algorithm (default: HMACSHA256)')
+    
+    # HMAC verify command
+    hmac_verify_parser = subparsers.add_parser('hmac-verify', help='Verify HMAC')
+    hmac_verify_parser.add_argument('message', help='Original message')
+    hmac_verify_parser.add_argument('expected', help='Expected HMAC (hex)')
+    hmac_verify_parser.add_argument('--key', '-k', required=True, help='HMAC key')
+    hmac_verify_parser.add_argument('--algorithm', '-a', choices=['HMACSHA256', 'HMACSHA512'],
+                                  default='HMACSHA256', help='HMAC algorithm (default: HMACSHA256)')
+    
+    return parser
+
+
+def _get_password(prompt: str = "Password: ") -> str:
+    """Securely get password from user."""
+    import getpass
+    try:
+        return getpass.getpass(prompt)
+    except KeyboardInterrupt:
+        print("\nOperation cancelled.")
+        sys.exit(1)
+
+
+def _read_key_or_file(key_arg: str) -> str:
+    """Read key from file if it's a path, otherwise return as-is."""
+    if os.path.exists(key_arg):
+        return import_key_from_file(key_arg)
+    return key_arg
+
+
+def run_cli():
+    """Main CLI entry point."""
+    parser = _setup_cli_parser()
+    args = parser.parse_args()
+    
+    if not args.command:
+        parser.print_help()
+        sys.exit(1)
+    
+    try:
+        # Initialize the securecrypto module
+        init()
+        
+        # Handle each command
+        if args.command == 'encrypt':
+            password = args.password or _get_password()
+            result = encrypt(args.text, password, args.encoding)
+            print(result)
+            
+        elif args.command == 'decrypt':
+            password = args.password or _get_password()
+            result = decrypt(args.ciphertext, password)
+            print(result)
+            
+        elif args.command == 'encrypt-file':
+            password = args.password or _get_password()
+            encrypt_file(args.input, args.output, password)
+            print(f"File encrypted: {args.input} -> {args.output}")
+            
+        elif args.command == 'decrypt-file':
+            password = args.password or _get_password()
+            decrypt_file(args.input, args.output, password)
+            print(f"File decrypted: {args.input} -> {args.output}")
+            
+        elif args.command == 'keygen':
+            public_key, private_key = generate_keypair()
+            
+            if args.public:
+                export_key_to_file(public_key, args.public)
+                print(f"Public key saved to: {args.public}")
+            else:
+                print("=== PUBLIC KEY ===")
+                print(public_key)
+                
+            if args.private:
+                export_key_to_file(private_key, args.private)
+                print(f"Private key saved to: {args.private}")
+            else:
+                print("=== PRIVATE KEY ===")
+                print(private_key)
+                
+        elif args.command == 'hybrid-encrypt':
+            public_key = _read_key_or_file(args.public_key)
+            result = hybrid_encrypt(args.text, public_key)
+            print(result)
+            
+        elif args.command == 'hybrid-decrypt':
+            private_key = _read_key_or_file(args.private_key)
+            result = hybrid_decrypt(args.ciphertext, private_key)
+            print(result)
+            
+        elif args.command == 'sign':
+            private_key = _read_key_or_file(args.private_key)
+            result = sign_string(args.text, private_key)
+            print(result)
+            
+        elif args.command == 'verify':
+            public_key = _read_key_or_file(args.public_key)
+            result = verify_string(args.text, args.signature, public_key)
+            print("Valid" if result else "Invalid")
+            sys.exit(0 if result else 1)
+            
+        elif args.command == 'sign-file':
+            private_key = _read_key_or_file(args.private_key)
+            sig_path = sign_file_to(args.file, private_key, args.output)
+            print(f"File signed: {sig_path}")
+            
+        elif args.command == 'verify-file':
+            public_key = _read_key_or_file(args.public_key)
+            result = verify_file_from(args.file, args.signature, public_key)
+            print("Valid" if result else "Invalid")
+            sys.exit(0 if result else 1)
+            
+        elif args.command == 'hash':
+            result = hash_string(args.text, args.algorithm)
+            print(result)
+            
+        elif args.command == 'hash-file':
+            result = hash_file(args.file, args.algorithm)
+            print(result)
+            
+        elif args.command == 'hmac':
+            result = hmac(args.message, args.key, args.algorithm)
+            print(result)
+            
+        elif args.command == 'hmac-verify':
+            result = hmac_verify(args.message, args.expected, args.key, args.algorithm)
+            print("Valid" if result else "Invalid")
+            sys.exit(0 if result else 1)
+            
+        else:
+            parser.print_help()
+            sys.exit(1)
+            
+    except KeyboardInterrupt:
+        print("\nOperation cancelled.")
+        sys.exit(1)
+    except FileNotFoundError as e:
+        print(f"Error: File not found - {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+
 # --------- Tiny self-test when run directly ---------
 if __name__ == '__main__':
-    print("[securecrypto] Self-test starting...")
-    init()  # ensure DLL loaded
+    # Check if CLI arguments are provided
+    if len(sys.argv) > 1:
+        run_cli()
+    else:
+        # Run self-test
+        print("[securecrypto] Self-test starting...")
+        init()  # ensure DLL loaded
 
-    # Constants
-    print("ALGORITHMS:", ALGORITHMS)
-    print("HMAC_ALGORITHMS:", HMAC_ALGORITHMS)
-    print("HMAC_ALGORITHMS_MAP:", HMAC_ALGORITHMS_MAP)
+        # Constants
+        print("ALGORITHMS:", ALGORITHMS)
+        print("HMAC_ALGORITHMS:", HMAC_ALGORITHMS)
+        print("HMAC_ALGORITHMS_MAP:", HMAC_ALGORITHMS_MAP)
 
-    # Symmetric encrypt/decrypt
-    ct_b64 = encrypt("Hello", "pw")
-    assert decrypt(ct_b64, "pw") == "Hello"
-    print("AES string round-trip OK")
+        # Symmetric encrypt/decrypt
+        ct_b64 = encrypt("Hello", "pw")
+        assert decrypt(ct_b64, "pw") == "Hello"
+        print("AES string round-trip OK")
 
-    # Bytes + encode_bytes
-    blob = b"\x01\x02\xff"
-    enc_b64 = encode_bytes(blob, "base64")
-    enc_hex = encode_bytes(blob, "hex")
-    enc_raw = encode_bytes(blob, "raw")
-    assert isinstance(enc_b64, str) and isinstance(enc_hex, str) and isinstance(enc_raw, (bytes, bytearray))
-    print("encode_bytes OK:", enc_b64, enc_hex, bytes(enc_raw))
+        # Bytes + encode_bytes
+        blob = b"\x01\x02\xff"
+        enc_b64 = encode_bytes(blob, "base64")
+        enc_hex = encode_bytes(blob, "hex")
+        enc_raw = encode_bytes(blob, "raw")
+        assert isinstance(enc_b64, str) and isinstance(enc_hex, str) and isinstance(enc_raw, (bytes, bytearray))
+        print("encode_bytes OK:", enc_b64, enc_hex, bytes(enc_raw))
 
-    # Hybrid + signing
-    pub, priv = generate_keypair()
-    hct = hybrid_encrypt("Top Secret", pub)
-    assert hybrid_decrypt(hct, priv) == "Top Secret"
-    print("Hybrid RSA+AES round-trip OK")
+        # Hybrid + signing
+        pub, priv = generate_keypair()
+        hct = hybrid_encrypt("Top Secret", pub)
+        assert hybrid_decrypt(hct, priv) == "Top Secret"
+        print("Hybrid RSA+AES round-trip OK")
 
-    sig = sign_string("hello", priv)
-    assert verify_string("hello", sig, pub) is True
-    print("Sign/Verify string OK")
+        sig = sign_string("hello", priv)
+        assert verify_string("hello", sig, pub) is True
+        print("Sign/Verify string OK")
 
-    # File sign/verify
-    tmp = Path("sc_demo.txt")
-    tmp.write_text("demo content")
-    sig_file = sign_file_to(tmp, priv)           # write .sig
-    assert verify_file_from(tmp, sig_file, pub)  # verify via .sig file
-    sig_loaded = load_signature(sig_file)
-    assert verify_file(tmp, sig_loaded, pub)     # verify via loaded string
-    print("Sign/Verify file OK (via .sig and loaded string)")
+        # File sign/verify
+        tmp = Path("sc_demo.txt")
+        tmp.write_text("demo content")
+        sig_file = sign_file_to(tmp, priv)           # write .sig
+        assert verify_file_from(tmp, sig_file, pub)  # verify via .sig file
+        sig_loaded = load_signature(sig_file)
+        assert verify_file(tmp, sig_loaded, pub)     # verify via loaded string
+        print("Sign/Verify file OK (via .sig and loaded string)")
 
-    # Hash/HMAC
-    assert hash_string("abc", ALGORITHMS[0]) == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
-    hm = hmac("msg", "key", HMAC_ALGORITHMS[0])
-    assert hmac_verify("msg", hm, "key", HMAC_ALGORITHMS_MAP["sha256"]) is True
-    print("Hash/HMAC OK")
+        # Hash/HMAC
+        assert hash_string("abc", ALGORITHMS[0]) == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        hm = hmac("msg", "key", HMAC_ALGORITHMS[0])
+        assert hmac_verify("msg", hm, "key", HMAC_ALGORITHMS_MAP["sha256"]) is True
+        print("Hash/HMAC OK")
 
-    print("[securecrypto] Self-test PASSED [OK]")
+        print("[securecrypto] Self-test PASSED [OK]")
+        print("\nTo use CLI interface, run with arguments:")
+        print("python securecrypto.py --help")

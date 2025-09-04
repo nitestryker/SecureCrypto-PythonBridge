@@ -71,6 +71,69 @@ sig = sc.sign_string("hello", priv)
 print("Signature valid?", sc.verify_string("hello", sig, pub))
 ```
 
+<details>
+  <summary>📦 Command Line Interface (CLI)</summary>
+
+Use `python -m securecrypto` from your terminal for quick operations.
+
+### 🔐 Encryption
+
+```bash
+python -m securecrypto encrypt -p "mypassword" -i plaintext.txt -o secret.enc
+```
+
+### 🔓 Decryption
+
+```bash
+python -m securecrypto decrypt -p "mypassword" -i secret.enc -o decrypted.txt
+```
+
+### ✍️ Sign a file
+
+```bash
+python -m securecrypto sign -k private.pem -i myfile.txt -o myfile.sig
+```
+
+### ✅ Verify a signature
+
+```bash
+python -m securecrypto verify -k public.pem -i myfile.txt -s myfile.sig
+```
+
+### 🔁 Hash a file
+
+```bash
+python -m securecrypto hash -i myfile.txt -a sha256
+```
+
+### 🧪 HMAC a file
+
+```bash
+python -m securecrypto hmac -p "sharedsecret" -i myfile.txt -a sha512
+```
+
+---
+
+### 🆘 Help Menu
+
+```bash
+python -m securecrypto --help
+```
+
+**Flags Overview:**
+
+| Flag/Option         | Description                               |
+|---------------------|-------------------------------------------|
+| `-i, --input`        | Path to input file                        |
+| `-o, --output`       | Path to output file                       |
+| `-p, --password`     | Password for AES or HMAC                  |
+| `-k, --key`          | Path to RSA key (public or private)       |
+| `-s, --signature`    | Path to signature file                    |
+| `-a, --algorithm`    | Algorithm to use (`sha256`, `sha512`, etc)|
+| `--help`             | Show help text                            |
+
+</details>
+
 ---
 
 ## 📘 Documentation
