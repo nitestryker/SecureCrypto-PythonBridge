@@ -418,7 +418,12 @@ def _get_password(prompt: str = "Password: ") -> str:
 def _read_key_or_file(key_arg: str) -> str:
     """Read key from file if it's a path, otherwise return as-is."""
     if os.path.exists(key_arg):
-        return import_key_from_file(key_arg)
+        try:
+            return import_key_from_file(key_arg)
+        except KeyLoadError:
+            raise  # Re-raise KeyLoadError as-is
+        except Exception as e:
+            raise KeyLoadError(f"Failed to read key from file '{key_arg}': {e}") from e
     return key_arg
 
 
